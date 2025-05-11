@@ -5,6 +5,22 @@
 
 This project is a morning reminder designed to help people with ADHD (Attention Deficit Hyperactivity Disorder) not forget about their needs and start the day with positivity. Every day, the program generates personalized wishes based on the current date, time of day, and the user's name using the Groq neural network API. Music - cover of "Undertale - Waterfall," (piano) and a drawing created by my friend Dräug.
 
+
+## Features
+
+- 🌅 Dynamic morning messages based on time of day
+- 🎨 Customizable character with open/closed mouth animation
+- 🌍 Multi-language support (English and Russian)
+- 🎵 Background music and sound effects
+- ⚙️ Customizable settings:
+  - Language selection
+  - Model selection
+  - Custom prompts
+  - Character images
+- 🖼️ Custom character images support
+- 🎯 Modern, frameless UI with rounded corners
+
+
 ![Image](data/image/изображение.png)
 
 ## How to Run

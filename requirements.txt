@@ -3,3 +3,5 @@ pygame
 Pillow
 groq
 python-dotenv
+Cython>=3.0.8
+numpy>=1.24.0

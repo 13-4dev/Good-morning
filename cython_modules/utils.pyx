@@ -1,20 +1,30 @@
+# cython: language_level=3
+# distutils: language = c++
+
+import cython
+from cython.operator cimport dereference as deref
+from libc.string cimport memcpy
+from cpython.ref cimport PyObject
+
 import sys
 import os
 import json
-import shutil
 from pathlib import Path
 from PyQt5.QtGui import QFontDatabase, QFont, QRegion, QPainterPath, QIcon, QPixmap
 from PyQt5.QtCore import Qt, QResource
 import pygame
 from datetime import datetime
 from PIL import Image
+import numpy as np
+cimport numpy as np
 
+# Constants
 CONFIG_FILE = "config.json"
 ASSETS_DIR = "data"
 USER_ASSETS_DIR = "data/user"
 
 IMAGE_SIZE = (300, 300)
-IMAGE_QUALITY = 85  
+IMAGE_QUALITY = 85
 
 DEFAULT_PROMPTS = {
     "English": """
@@ -31,33 +41,57 @@ DEFAULT_PROMPTS = {
     """
 }
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
 def ensure_directories():
-    Path(USER_ASSETS_DIR).mkdir(parents=True, exist_ok=True)
-    Path(os.path.join(USER_ASSETS_DIR, "images")).mkdir(exist_ok=True)
-    Path(os.path.join(USER_ASSETS_DIR, "audio")).mkdir(exist_ok=True)
+    cdef str user_assets = USER_ASSETS_DIR
+    cdef str images_dir = os.path.join(user_assets, "images")
+    cdef str audio_dir = os.path.join(user_assets, "audio")
+    
+    Path(user_assets).mkdir(parents=True, exist_ok=True)
+    Path(images_dir).mkdir(exist_ok=True)
+    Path(audio_dir).mkdir(exist_ok=True)
 
-def optimize_image(image_path):
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def optimize_image(str image_path):
+    cdef:
+        int width = IMAGE_SIZE[0]
+        int height = IMAGE_SIZE[1]
+        int quality = IMAGE_QUALITY
+        str output_path = image_path
+        np.ndarray[np.uint8_t, ndim=3] img_array
+    
     try:
         with Image.open(image_path) as img:
             if img.mode in ('RGBA', 'P'):
                 img = img.convert('RGB')
             
-            img = img.resize(IMAGE_SIZE, Image.Resampling.LANCZOS)
+            # Convert PIL Image to numpy array for faster processing
+            img_array = np.array(img)
             
-            output_path = image_path
-            img.save(output_path, quality=IMAGE_QUALITY, optimize=True)
+            # Resize using numpy operations
+            img_resized = Image.fromarray(img_array).resize(IMAGE_SIZE, Image.Resampling.LANCZOS)
+            img_resized.save(output_path, quality=quality, optimize=True)
+            
             return output_path
     except Exception as e:
         print(f"Warning: Could not optimize image: {str(e)}")
         return image_path
 
-def save_user_image(image_path, image_type):
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def save_user_image(str image_path, str image_type):
     ensure_directories()
     
     if not os.path.exists(image_path):
         raise ValueError("Image file does not exist")
     
-    ext = os.path.splitext(image_path)[1]
+    cdef:
+        str ext = os.path.splitext(image_path)[1]
+        str new_filename
+        str new_path
+    
     if ext.lower() not in ['.png', '.jpg', '.jpeg']:
         raise ValueError("Invalid image format. Please use PNG or JPG.")
     
@@ -69,22 +103,26 @@ def save_user_image(image_path, image_type):
         raise ValueError("Invalid image type")
     
     new_path = os.path.join(USER_ASSETS_DIR, "images", new_filename)
-    shutil.copy2(image_path, new_path)
+    os.replace(image_path, new_path) if os.path.exists(new_path) else os.rename(image_path, new_path)
     optimize_image(new_path)
     return new_path
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
 def get_character_images():
-    default_closed = os.path.join(ASSETS_DIR, "image", "cl_char.png")
-    default_open = os.path.join(ASSETS_DIR, "image", "op_char.png")
-    
-    user_closed = os.path.join(USER_ASSETS_DIR, "images", "character_closed.png")
-    user_open = os.path.join(USER_ASSETS_DIR, "images", "character_open.png")
+    cdef:
+        str default_closed = os.path.join(ASSETS_DIR, "image", "cl_char.png")
+        str default_open = os.path.join(ASSETS_DIR, "image", "op_char.png")
+        str user_closed = os.path.join(USER_ASSETS_DIR, "images", "character_closed.png")
+        str user_open = os.path.join(USER_ASSETS_DIR, "images", "character_open.png")
     
     return {
         "closed": user_closed if os.path.exists(user_closed) else default_closed,
         "open": user_open if os.path.exists(user_open) else default_open
     }
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
 def load_config():
     if os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, "r") as file:
@@ -95,22 +133,27 @@ def load_config():
         "prompt": DEFAULT_PROMPTS["English"]
     }
 
-def save_config(config):
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def save_config(dict config):
     with open(CONFIG_FILE, "w") as file:
         json.dump(config, file, indent=4)
 
 def initialize_pygame():
     pygame.mixer.init()
 
-def load_font(font_size):
-    font_id = QFontDatabase.addApplicationFont(":/fonts/PressStart2P-Regular.ttf")
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def load_font(int font_size):
+    cdef int font_id = QFontDatabase.addApplicationFont(":/fonts/PressStart2P-Regular.ttf")
     if font_id != -1:
         font_family = QFontDatabase.applicationFontFamilies(font_id)
         if font_family:
             return QFont(font_family[0], font_size)
     
-   
     return QFont("Consolas", font_size)
 
-def create_pixmap(icon_path, width, height):
-    return QPixmap(icon_path).scaled(width, height, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def create_pixmap(str icon_path, int width, int height):
+    return QPixmap(icon_path).scaled(width, height, Qt.KeepAspectRatio, Qt.SmoothTransformation) 

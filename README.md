@@ -1,4 +1,3 @@
-
 ---
 
 # Morning Reminder for Self-Care
@@ -55,4 +54,63 @@ To have the program run automatically on system startup:
 If you encounter any issues or have questions during setup, feel free to reach out for help.
 
 ---
+
+## Building with Cython
+
+This project now uses Cython for improved performance. To build the Cython modules:
+
+1. Install the requirements:
+```bash
+pip install -r requirements.txt
+```
+
+2. Build the Cython modules:
+```bash
+python setup.py build_ext --inplace
+```
+
+3. Run the application as usual:
+```bash
+python main.py
+```
+
+### Build Steps
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd Good-morning
+```
+
+2. Create and activate a virtual environment (recommended):
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# Linux/macOS
+python -m venv venv
+source venv/bin/activate
+```
+
+3. Install the requirements:
+```bash
+pip install -r requirements.txt
+```
+
+4. Build the Cython modules:
+```bash
+python setup.py build_ext --inplace
+```
+
+5. Run the application:
+```bash
+python main.py
+```
+
+
+Note: You need a C/C++ compiler installed on your system to build the Cython modules:
+- Windows: Microsoft Visual C++ Build Tools
+- Linux: GCC
+- macOS: Xcode Command Line Tools
 

@@ -1,14 +1,22 @@
+# cython: language_level=3
+import cython
 from groq import Groq
-from utils import CONFIG_FILE, DEFAULT_PROMPTS
+from utils_cy import CONFIG_FILE, DEFAULT_PROMPTS
 from datetime import datetime
 import sys
+from typing import Dict, Any, Generator
 
 SYSTEM_PROMPTS = {
     "English": "You are a friendly morning assistant that provides encouraging messages in English.",
     "Russian": "Вы дружелюбный утренний ассистент, который предоставляет ободряющие сообщения на русском языке."
 }
 
-def generate_morning_message(config):
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def generate_morning_message(dict config) -> str:
+    cdef:
+        str day, time, name, language, prompt_template, prompt, message, error_message
+    
     try:
         now = datetime.now()
         day = now.strftime("%A")
@@ -66,4 +74,4 @@ def generate_morning_message(config):
         sys.exit(1)
     except Exception as e:
         print(f"Unexpected error: {str(e)}")
-        sys.exit(1)
+        sys.exit(1) 

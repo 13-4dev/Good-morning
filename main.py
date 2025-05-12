@@ -4,9 +4,9 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QVBoxLayout, QPushBu
                             QMessageBox, QCheckBox, QFileDialog)
 from PyQt5.QtCore import QTimer, QDateTime, Qt
 from PyQt5.QtGui import QFont, QRegion, QPainterPath, QIcon
-from utils import (load_config, save_config, initialize_pygame, load_font, create_pixmap, 
-                  DEFAULT_PROMPTS, save_user_image, get_character_images)
-from generation import generate_morning_message
+from utils_cy import (load_config, save_config, initialize_pygame, load_font, create_pixmap, 
+                   DEFAULT_PROMPTS, save_user_image, get_character_images)
+from generation_cy import generate_morning_message
 import pygame
 import sys
 
